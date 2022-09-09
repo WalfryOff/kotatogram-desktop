@@ -140,7 +140,7 @@ QString ChatIdLabel(int option) {
 	::Kotato::JsonSettings::Set(#Option, enabled); \
 	::Kotato::JsonSettings::Write(); \
 	controller->reloadFiltersMenu(); \
-	App::wnd()->fixOrder(); \
+	Core::App().activePrimaryWindow()->fixOrder(); \
 }, container->lifetime());
 
 void SetupKotatoChats(
