@@ -6437,7 +6437,10 @@ void HistoryWidget::mousePressEvent(QMouseEvent *e) {
 				.groupOptions = draft.groupOptions,
 			});
 		} else {
-			Ui::showPeerHistory(_peer, _editMsgId ? _editMsgId : replyToId());
+			controller()->showPeerHistory(
+				_peer,
+				Window::SectionShow::Way::ClearStack,
+				_editMsgId ? _editMsgId : replyToId());
 		}
 	}
 }
@@ -8398,8 +8401,6 @@ void HistoryWidget::paintEditHeader(Painter &p, const QRect &rect, int left, int
 	auto editTimeLeft = (session().serverConfig().editTimeLimit * 1000LL) - timeSinceMessage;
 	if (editTimeLeft < 2) {
 		editTimeLeftText = u"0:00"_q;
-	} else if (editTimeLeft > kDisplayEditTimeWarningMs) {
-		updateIn = static_cast<int>(qMin(editTimeLeft - kDisplayEditTimeWarningMs, qint64(kFullDayInMs)));
 	} else {
 		updateIn = static_cast<int>(editTimeLeft % 1000);
 		if (!updateIn) {
@@ -8408,7 +8409,9 @@ void HistoryWidget::paintEditHeader(Painter &p, const QRect &rect, int left, int
 		++updateIn;
 
 		editTimeLeft = (editTimeLeft - 1) / 1000; // seconds
-		editTimeLeftText = u"%1:%2"_q.arg(editTimeLeft / 60).arg(editTimeLeft % 60, 2, 10, QChar('0'));
+		editTimeLeftText = (editTimeLeft >= 3600
+			? u"%1:%2:%3"_q.arg(editTimeLeft / 3600).arg(editTimeLeft % 3600 / 60, 2, 10, QChar('0')).arg(editTimeLeft % 60, 2, 10, QChar('0'))
+			: u"%1:%2"_q.arg(editTimeLeft / 60).arg(editTimeLeft % 60, 2, 10, QChar('0')));
 	}
 
 	// Restart timer only if we are sure that we've painted the whole timer.
